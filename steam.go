@@ -34,7 +34,7 @@ func requestPriceOverview(appIds []t.GameId) (map[t.GameId]SteamResponse, error)
 	urlBuilder := strings.Builder{}
 	urlBuilder.WriteString("https://store.steampowered.com/api/appdetails?appids=")
 	for _, appId := range appIds {
-		fmt.Fprintf(&urlBuilder, "%s", appId)
+		fmt.Fprintf(&urlBuilder, "%s,", appId)
 	}
 	urlBuilder.WriteString("&filters=price_overview")
 	log.WithField("url", urlBuilder.String()).Trace()
