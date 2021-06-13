@@ -11,6 +11,8 @@ import (
 	tb "gopkg.in/tucnak/telebot.v2"
 )
 
+const MAX_ALLOWED_SUBSCRIPTIONS = 10
+
 var gameUrlRegex = regexp.MustCompile(`store\.steampowered\.com/app/(\d{1,9})`)
 
 func sub(b *tb.Bot, m *tb.Message) {
@@ -49,6 +51,11 @@ func sub(b *tb.Bot, m *tb.Message) {
 		AddDedup(&entry.Subscriptions, t.GameId(gameId))
 	}
 	log.WithField("entry", entry).Trace("Got entry from a database")
+	if len(entry.Subscriptions) > MAX_ALLOWED_SUBSCRIPTIONS {
+		b.Send(m.Sender, `You have reached the limit of subscriptions.
+		 The maximum allowed number of subscriptions is 10.`)
+		return
+	}
 	err = strg.Store(chatId, entry)
 	if err != nil {
 		b.Send(m.Sender, fmt.Sprintf("storing failed: %s", err))
