@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"regexp"
 	"steam-discount/storage"
 	t "steam-discount/types"
 	"strconv"
@@ -10,14 +11,30 @@ import (
 	tb "gopkg.in/tucnak/telebot.v2"
 )
 
+var gameUrlRegex = regexp.MustCompile(`store\.steampowered\.com/app/(\d{1,9})`)
+
 func sub(b *tb.Bot, m *tb.Message) {
-	gameIdParsed, err := strconv.ParseUint(m.Payload, 10, 0)
-	gameId := t.GameId(gameIdParsed)
-	chatId := t.ChatId(m.Chat.ID)
-	if err != nil {
-		b.Send(m.Sender, fmt.Sprintf("couldn't parse game id: %s", err))
-		return
+	var gameId t.GameId
+	{
+		var toParse string
+
+		matches := gameUrlRegex.FindStringSubmatch(m.Payload)
+		if matches == nil {
+			toParse = m.Payload
+		} else {
+			toParse = matches[1]
+		}
+
+		parsed, err := strconv.ParseUint(toParse, 10, 0)
+		if err != nil {
+			msg := fmt.Sprintf("incorrect syntax, example: /sub <620|https://store.steampowered.com/app/620/Portal_2/>\nand you wrote: %s", m.Payload)
+			b.Send(m.Sender, msg)
+			return
+		}
+		gameId = t.GameId(parsed)
 	}
+
+	chatId := t.ChatId(m.Chat.ID)
 	log.WithField("game_id", gameId).Trace("Subscribe")
 	entry, err := strg.Load(chatId)
 	if err == storage.Nil {
@@ -40,6 +57,15 @@ func sub(b *tb.Bot, m *tb.Message) {
 	b.Send(m.Sender, fmt.Sprintf("Subscribed to %s", gameId))
 }
 
-func AddDedup(subs *[]t.GameId, gi t.GameId) {
-	*subs = append(*subs, gi)
+func AddDedup(subs *[]t.GameId, gameId t.GameId) {
+	var found bool
+	for _, gi := range *subs {
+		if gi == gameId {
+			found = true
+			break
+		}
+	}
+	if !found {
+		*subs = append(*subs, gameId)
+	}
 }
