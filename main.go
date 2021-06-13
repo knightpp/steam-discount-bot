@@ -6,7 +6,6 @@ import (
 
 	"steam-discount/storage"
 
-	"github.com/go-redis/redis/v8"
 	"github.com/joho/godotenv"
 	log "github.com/sirupsen/logrus"
 	tb "gopkg.in/tucnak/telebot.v2"
@@ -24,11 +23,7 @@ func main() {
 		return
 	}
 	log.Info("REDIS_URL = ", redisAddr)
-	strg = storage.NewRedis(&redis.Options{
-		Addr:     redisAddr,
-		Password: "",
-		DB:       0,
-	})
+	strg = storage.NewRedis(redisAddr)
 
 	token, ok := os.LookupEnv("BOT_TOKEN")
 	if !ok {

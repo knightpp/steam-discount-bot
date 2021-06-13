@@ -79,6 +79,10 @@ func (it redisIterator) Next() (t.Entry, error) {
 	}
 }
 
-func NewRedis(opts *redis.Options) Storager {
+func NewRedis(url string) Storager {
+	opts, err := redis.ParseURL(url)
+	if err != nil {
+		logrus.WithError(err).Panic("couldn't parse redis url")
+	}
 	return &redisStorage{rdb: redis.NewClient(opts), ctx: context.Background()}
 }
