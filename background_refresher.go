@@ -45,7 +45,7 @@ func backgroundRefresher2(b *tb.Bot) error {
 		log.Trace("gameIds still contains something")
 		resp, err := requestPriceOverview(gameIds)
 		if err != nil {
-			return fmt.Errorf("reques to steam returned: %w", err)
+			return fmt.Errorf("request to steam returned: %w", err)
 		}
 		process(b, resp, m)
 	}
@@ -85,7 +85,7 @@ func process(b *tb.Bot, steamResponses map[t.GameId]SteamResponse, chats map[t.G
 		if sr.Data.PriceOverview.DiscountPercent > 0 {
 			deleteGameFromChats(gameId, chats)
 			sendToChats(b, chats[gameId],
-				fmt.Sprintf("(%s) on sale, discount %d%%", gameId,
+				fmt.Sprintf("(%s) is on sale now, discount %d%%", gameId,
 					sr.Data.PriceOverview.DiscountPercent))
 		}
 	}
