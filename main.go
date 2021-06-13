@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"time"
 
@@ -30,9 +31,19 @@ func main() {
 		log.Fatal("no BOT_TOKEN env variable")
 		return
 	}
+
+	port, ok := os.LookupEnv("PORT")
+	if !ok {
+		log.Fatal("no PORT env var")
+		return
+	}
+	url := fmt.Sprintf("https://steam-discount-notif-bot.herokuapp.com:%s/bot%s", port, token)
 	b, err := tb.NewBot(tb.Settings{
-		Token:  token,
-		Poller: &tb.LongPoller{Timeout: 10 * time.Second},
+		Token: token,
+		// Poller: &tb.LongPoller{Timeout: 10 * time.Second},
+		Poller: &tb.Webhook{
+			Listen: url,
+		},
 	})
 
 	if err != nil {
@@ -67,12 +78,6 @@ func main() {
 	}()
 	log.Info("Started")
 
-	url := "https://steam-discount-notif-bot.herokuapp.com/bot" + b.Token
-	b.SetWebhook(
-		&tb.Webhook{
-			Listen: url,
-		},
-	)
 	b.Start()
 }
 
