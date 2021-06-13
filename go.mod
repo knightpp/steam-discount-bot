@@ -1,3 +1,4 @@
+// +heroku goVersion go1.16
 module steam-discount
 
 go 1.16
