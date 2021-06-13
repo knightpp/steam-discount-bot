@@ -18,12 +18,12 @@ func main() {
 	log.SetLevel(log.TraceLevel)
 	log.SetReportCaller(true)
 	_ = godotenv.Load()
-	redisAddr, ok := os.LookupEnv("REDIS_HOST")
+	redisAddr, ok := os.LookupEnv("REDIS_URL")
 	if !ok {
-		log.Fatal("no REDIS_HOST env var")
+		log.Fatal("no REDIS_URL env var")
 		return
 	}
-	log.Info("REDIS_HOST = ", redisAddr)
+	log.Info("REDIS_URL = ", redisAddr)
 	strg = storage.NewRedis(&redis.Options{
 		Addr:     redisAddr,
 		Password: "",
