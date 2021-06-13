@@ -62,19 +62,28 @@ func sendToChats(b *tb.Bot, chats []t.ChatId, message string) {
 	}
 }
 
+func deleteGameFromChats(gameId t.GameId, chats map[t.GameId][]t.ChatId) {
+	for _, chat := range chats[gameId] {
+		err := strg.Delete(chat, gameId)
+		if err != nil {
+			log.WithError(err).Warn("failed to delete")
+		}
+	}
+}
+
 // Iterates over responses, on error unsubscribes.
 // If DiscountPercent > 0, sends message to all subscribed
 // chats and unsubscribes the chats.
 func process(b *tb.Bot, steamResponses map[t.GameId]SteamResponse, chats map[t.GameId][]t.ChatId) {
 	for gameId, sr := range steamResponses {
 		if !sr.Success {
-			strg.Delete(t.ChatId(gameId))
+			deleteGameFromChats(gameId, chats)
 			sendToChats(b, chats[gameId],
 				fmt.Sprintf("Failed to check (%s), you have been unsubscribed from the game.", gameId))
 			continue
 		}
 		if sr.Data.PriceOverview.DiscountPercent > 0 {
-			strg.Delete(t.ChatId(gameId))
+			deleteGameFromChats(gameId, chats)
 			sendToChats(b, chats[gameId],
 				fmt.Sprintf("(%s) on sale, discount %d%%", gameId,
 					sr.Data.PriceOverview.DiscountPercent))
