@@ -36,7 +36,7 @@ func sub(b *tb.Bot, m *tb.Message) {
 		b.Send(m.Sender, fmt.Sprintf("storing failed: %s", err))
 		return
 	}
-	b.Send(m.Sender, fmt.Sprintf("Subscribed to %s", chatId))
+	b.Send(m.Sender, fmt.Sprintf("Subscribed to %s", gameId))
 }
 
 func AddDedup(subs *[]t.GameId, gi t.GameId) {
