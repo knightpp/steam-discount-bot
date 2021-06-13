@@ -71,6 +71,13 @@ func main() {
 		}
 	}()
 	log.Info("Started")
+
+	url := "https://steam-discount-notif-bot.herokuapp.com/bot" + b.Token
+	b.SetWebhook(
+		&tb.Webhook{
+			Listen: url,
+		},
+	)
 	b.Start()
 }
 
