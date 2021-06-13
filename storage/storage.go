@@ -13,7 +13,7 @@ func (s nilStruct) Error() string {
 }
 
 type Storager interface {
-	Delete(key t.ChatId) error
+	Delete(key t.ChatId, game t.GameId) error
 	Store(key t.ChatId, value t.Entry) error
 	Load(key t.ChatId) (t.Entry, error)
 	Iterator() Iterator

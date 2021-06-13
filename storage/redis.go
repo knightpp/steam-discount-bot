@@ -7,7 +7,7 @@ import (
 	"strconv"
 
 	"github.com/go-redis/redis/v8"
-	"github.com/sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	"github.com/vmihailenco/msgpack/v5"
 )
 
@@ -30,7 +30,7 @@ func (r *redisStorage) Store(key t.ChatId, value t.Entry) error {
 }
 
 func (r *redisStorage) Load(key t.ChatId) (t.Entry, error) {
-	logrus.WithField("redis", r).WithField("key", key).Info("loading by key")
+	log.WithField("redis", r).WithField("key", key).Info("loading by key")
 	var entry t.Entry
 	bytes, err := r.rdb.Get(r.ctx, key.String()).Bytes()
 	if err == redis.Nil {
@@ -45,8 +45,39 @@ func (r *redisStorage) Load(key t.ChatId) (t.Entry, error) {
 	}
 	return entry, nil
 }
-func (r *redisStorage) Delete(key t.ChatId) error {
-	return r.rdb.Del(r.ctx, key.String()).Err()
+func (r *redisStorage) Delete(key t.ChatId, game t.GameId) error {
+	entry, err := r.Load(key)
+	if err != nil {
+		return err
+	}
+	log.WithField("entry", entry).Trace("loading entry")
+	indexToDelete := -1
+	for i, g := range entry.Subscriptions {
+		if g == game {
+			indexToDelete = i
+		}
+	}
+	log.WithField("indexToDelete", indexToDelete).Trace("about to delete")
+	if indexToDelete == -1 {
+		// nothing to delete, just return
+		return nil
+	}
+	a := entry.Subscriptions
+	copy(a[indexToDelete:], a[indexToDelete+1:]) // Shift a[i+1:] left one index.
+	entry.Subscriptions = a[:len(a)-1]           // Truncate slice.
+	if len(entry.Subscriptions) == 0 {
+		log.WithField("chat_id", key).Trace("deleting entry")
+		// if there are no subs just delete all entry
+		return r.rdb.Del(r.ctx, key.String()).Err()
+	} else {
+		log.WithFields(
+			log.Fields{
+				"chat_id": key,
+				"entry":   entry,
+			}).Trace("storing modified entry")
+		// otherwise store back entry
+		return r.Store(key, entry)
+	}
 }
 
 func (r *redisStorage) Iterator() Iterator {
@@ -66,7 +97,7 @@ func (it redisIterator) Next() (t.Entry, error) {
 	if it.iter.Next(it.r.ctx) {
 		chatId, err := strconv.ParseInt(it.iter.Val(), 10, 0)
 		if err != nil {
-			logrus.WithError(err).Panic("failed to parse chat_id")
+			log.WithError(err).Panic("failed to parse chat_id")
 			return t.Entry{}, err
 		}
 		entry, err := it.r.Load(t.ChatId(chatId))
@@ -82,7 +113,7 @@ func (it redisIterator) Next() (t.Entry, error) {
 func NewRedis(url string) Storager {
 	opts, err := redis.ParseURL(url)
 	if err != nil {
-		logrus.WithError(err).Panic("couldn't parse redis url")
+		log.WithError(err).Panic("couldn't parse redis url")
 	}
 	return &redisStorage{rdb: redis.NewClient(opts), ctx: context.Background()}
 }
