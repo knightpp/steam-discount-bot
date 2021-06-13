@@ -13,10 +13,8 @@ func backgroundRefresher2(b *tb.Bot) error {
 	it := strg.Iterator()
 	m := make(map[t.GameId][]t.ChatId)
 	for {
-		log.Trace("iterating entry")
 		entry, err := it.Next()
 		if err == storage.Nil {
-			log.Trace("iterating come to end")
 			break
 		} else if err != nil {
 			return fmt.Errorf("db iterator returned error: %w", err)
@@ -28,7 +26,6 @@ func backgroundRefresher2(b *tb.Bot) error {
 	}
 	gameIds := make([]t.GameId, 0, 100)
 	for k := range m {
-		log.Trace("appending gameId to a slice")
 		gameIds = append(gameIds, k)
 		if len(gameIds) == 100 {
 			resp, err := requestPriceOverview(gameIds)
@@ -42,7 +39,6 @@ func backgroundRefresher2(b *tb.Bot) error {
 
 	}
 	if len(gameIds) != 0 {
-		log.Trace("gameIds still contains something")
 		resp, err := requestPriceOverview(gameIds)
 		if err != nil {
 			return fmt.Errorf("request to steam returned: %w", err)
