@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"os"
 	"time"
 
@@ -14,35 +13,31 @@ import (
 
 var strg storage.Storager
 
+func getEnvVarOrExit(name string) string {
+	v, ok := os.LookupEnv(name)
+	if !ok {
+		log.Fatalf("no %s env var", name)
+	}
+	return v
+}
+
 func main() {
 	log.SetLevel(log.TraceLevel)
 	log.SetReportCaller(true)
 	_ = godotenv.Load()
-	redisAddr, ok := os.LookupEnv("REDIS_URL")
-	if !ok {
-		log.Fatal("no REDIS_URL env var")
-		return
-	}
-	log.Info("REDIS_URL = ", redisAddr)
+
+	redisAddr := getEnvVarOrExit("REDIS_URL")
+	token := getEnvVarOrExit("BOT_TOKEN")
+	port := getEnvVarOrExit("PORT")
+	publicUrl := getEnvVarOrExit("PUBLIC_URL")
+
 	strg = storage.NewRedis(redisAddr)
-
-	token, ok := os.LookupEnv("BOT_TOKEN")
-	if !ok {
-		log.Fatal("no BOT_TOKEN env variable")
-		return
-	}
-
-	port, ok := os.LookupEnv("PORT")
-	if !ok {
-		log.Fatal("no PORT env var")
-		return
-	}
-	// url := fmt.Sprintf("https://steam-discount-notif-bot.herokuapp.com:%s/bot%s", port, token)
 	b, err := tb.NewBot(tb.Settings{
 		Token: token,
 		// Poller: &tb.LongPoller{Timeout: 10 * time.Second},
 		Poller: &tb.Webhook{
-			Listen: fmt.Sprintf(":%s/bot%s", port, token),
+			Listen:   ":" + port,
+			Endpoint: &tb.WebhookEndpoint{PublicURL: publicUrl},
 		},
 	})
 
