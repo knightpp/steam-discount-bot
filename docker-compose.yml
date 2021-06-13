@@ -1,0 +1,20 @@
+version: "3.9"
+volumes: 
+    go-modules:
+services:
+    bot:
+        build: .
+        depends_on:
+            - redis
+        environment: 
+            # - BOT_TOKEN=cassandra
+            - REDIS_HOST=redis:6379
+        # command: ["bash", "-c", "/waiter && /mini-crud"]
+        volumes: 
+            - go-modules:/go/pkg/mod
+    redis:
+        # ports: 
+        #     - "9042:9042" # for seeder
+        image: redis
+        volumes: 
+            - ./redis_data:/data
