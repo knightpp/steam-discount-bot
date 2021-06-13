@@ -52,8 +52,8 @@ func sub(b *tb.Bot, m *tb.Message) {
 	}
 	log.WithField("entry", entry).Trace("Got entry from a database")
 	if len(entry.Subscriptions) > MAX_ALLOWED_SUBSCRIPTIONS {
-		b.Send(m.Sender, `You have reached the limit of subscriptions.
-		 The maximum allowed number of subscriptions is 10.`)
+		b.Send(m.Sender, "You have reached the limit of subscriptions."+
+			"The maximum allowed number of subscriptions is 10.")
 		return
 	}
 	err = strg.Store(chatId, entry)
