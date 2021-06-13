@@ -37,12 +37,12 @@ func main() {
 		log.Fatal("no PORT env var")
 		return
 	}
-	url := fmt.Sprintf("https://steam-discount-notif-bot.herokuapp.com:%s/bot%s", port, token)
+	// url := fmt.Sprintf("https://steam-discount-notif-bot.herokuapp.com:%s/bot%s", port, token)
 	b, err := tb.NewBot(tb.Settings{
 		Token: token,
 		// Poller: &tb.LongPoller{Timeout: 10 * time.Second},
 		Poller: &tb.Webhook{
-			Listen: url,
+			Listen: fmt.Sprintf(":%s/bot%s", port, token),
 		},
 	})
 
