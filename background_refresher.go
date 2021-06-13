@@ -81,8 +81,10 @@ func process(b *tb.Bot, steamResponses map[t.GameId]SteamResponse, chats map[t.G
 		if sr.Data.PriceOverview.DiscountPercent > 0 {
 			deleteGameFromChats(gameId, chats)
 			sendToChats(b, chats[gameId],
-				fmt.Sprintf("(%s) is on sale now, discount %d%%", gameId,
-					sr.Data.PriceOverview.DiscountPercent))
+				fmt.Sprintf("(%s) is on sale now, discount %d%%\n%s%s", gameId,
+					sr.Data.PriceOverview.DiscountPercent,
+					"https://store.steampowered.com/app/",
+					gameId))
 		}
 	}
 }
