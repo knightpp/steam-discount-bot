@@ -28,7 +28,7 @@ func subs(b *tb.Bot, m *tb.Message) {
 	}
 	builder := strings.Builder{}
 	for i, sub := range entry.Subscriptions {
-		fmt.Fprintf(&builder, "%d) %d", i+1, sub)
+		fmt.Fprintf(&builder, "%d) %d\n", i+1, sub)
 	}
 	b.Send(m.Sender, builder.String())
 }
