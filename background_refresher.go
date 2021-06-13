@@ -30,7 +30,7 @@ func backgroundRefresher2(b *tb.Bot) error {
 		if len(gameIds) == 100 {
 			resp, err := requestPriceOverview(gameIds)
 			if err != nil {
-				return fmt.Errorf("reques to steam returned: %w", err)
+				return fmt.Errorf("request to steam returned: %w", err)
 			}
 			process(b, resp, m)
 
