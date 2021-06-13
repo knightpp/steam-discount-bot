@@ -11,7 +11,8 @@ import (
 )
 
 func sub(b *tb.Bot, m *tb.Message) {
-	gameId, err := strconv.ParseUint(m.Payload, 10, 0)
+	gameIdParsed, err := strconv.ParseUint(m.Payload, 10, 0)
+	gameId := t.GameId(gameIdParsed)
 	chatId := t.ChatId(m.Chat.ID)
 	if err != nil {
 		b.Send(m.Sender, fmt.Sprintf("couldn't parse game id: %s", err))
